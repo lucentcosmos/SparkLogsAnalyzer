@@ -23,19 +23,20 @@ import java.util.List;
 public class LogAnalyzerSQL {
 
   public static void main(String[] args) {
+    // Create the spark context.
     SparkConf conf = new SparkConf().setAppName("Log Analyzer SQL");
     JavaSparkContext sc = new JavaSparkContext(conf);
+    JavaSQLContext sqlContext = new JavaSQLContext(sc);
 
     if (args.length == 0) {
       System.out.println("Must specify an access logs file.");
       System.exit(-1);
     }
-
     String logFile = args[0];
     JavaRDD<ApacheAccessLog> accessLogs = sc.textFile(logFile)
         .map(ApacheAccessLog::parseFromLogLine);
 
-    JavaSQLContext sqlContext = new JavaSQLContext(sc);
+    // Spark SQL can imply a schema for a table if given a Java class with getters and setters.
     JavaSchemaRDD schemaRDD = sqlContext.applySchema(accessLogs, ApacheAccessLog.class).cache();
     schemaRDD.registerAsTable("logs");
 

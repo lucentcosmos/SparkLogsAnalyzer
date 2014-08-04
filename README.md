@@ -17,6 +17,14 @@ learn better by example.  Those readers can browse the chapters, see
 what features of the logs analyzer is similar to their use case, and 
 refashion the code samples in this project for their needs.
 
+## How to use this project 
+
+This project is broken up into chapters with bite-sized examples for 
+demonstrating Spark functionality for logs processing.  This makes
+the examples easy to run.  We hope you'll combine various exercises
+to create a custom logs processing application that is compatible for
+your data and with your organization's technology stack.
+
 ###[Chapter 1: Introduction to Apache Spark](chapter1/README.md)
 
 The Apache Spark library is introduced, including RDD's, transformation, 
