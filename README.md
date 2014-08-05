@@ -1,16 +1,14 @@
 # SparkLogsAnalyzer
 
-This project demonstrates how easy it is to use Apache Spark for logs analysis.
-Logs analysis is an ideal use case for Spark, as it's a very large data source
-that most organizations have, but logs are often too expensive to persist
-to a traditional SQL or other type of database where they could be easily
-digested.  Instead, logs are often stored in files to disk which have been
-traditionally slow and difficult to process.  Logs contain an incredibly
-rich set of information that can be used for business and customer
+This project demonstrates how easy it is to do logs analysis with Apache Spark.
+Logs analysis is an ideal use case for Spark - it's a very large, common data source
+and contains a rich set of information.  Spark allows you to store your logs
+in files to disk cheaply, while still providing a
+quick and simple way to process logs.  We hope this project will show you to use
+Apache Spark on your organization's production logs and fully harness the power
+of that data.  You can use logs data for better business and customer
 intelligence, for building recommendation systems, for preventing fraud,
-and much more.  We hope this project will show you to use Apache Spark on
-your organization's production logs and fully harness the power of 
-all that data.
+and much more.  
 
 This project will also appeal to those who want to learn Spark and 
 learn better by example.  Those readers can browse the chapters, see
@@ -20,10 +18,10 @@ refashion the code samples in this project for their needs.
 ## How to use this project 
 
 This project is broken up into chapters with bite-sized examples for 
-demonstrating Spark functionality for logs processing.  This makes
-the examples easy to run.  We hope you'll combine various exercises
-to create a custom logs processing application that is compatible for
-your data and with your organization's technology stack.
+demonstrating new Spark functionality for logs processing.  This makes
+the examples easy to run and learn as they cover just one new topic at a time.
+At the end, we put a few of these examples together to form a logs
+analyzer application.
 
 ###[Chapter 1: Introduction to Apache Spark](chapter1/README.md)
 
@@ -31,20 +29,34 @@ The Apache Spark library is introduced, including RDD's, transformation,
 and actions.  We'll also introduce Spark SQL and Spark Streaming.  By the
 end of this chapter, a reader will know how to do queries with Apache Spark.
 
-### **Chapter 2: Importing data into Spark**
+###[Chapter 2: Importing and Exporting Data](chapter2/README.md)
 
-This chapter includes examples for batch import of data into Spark, 
-as well as importing data for Spark Streaming.
+This chapter includes examples to illustrate how to get your data into 
+Spark - both batch import of data, as well as streaming data import
+for Spark Streaming.  It also covers how to export the data processed with
+Spark so that it can be served in your production systems.
 
-### **Chapter 3: Exporting data out of Spark**
+### Chapter 3: More Spark
+
+* Unittest?
+* Illustrate calling an API on the data, such as for geo locating an ipaddress.
+* Demonstrate a join.
+* Broadcast variables
+* Accumulators
+
+### **Chapter 4: Machine Learning Spark**
 
 [[TBW]]
 
-### Chapter 4: Machine Learning with Spark
 
-[[TBW]]
+###[Logs Analyis Application](app/README.md)
 
+This section puts together some of the code in the other chapters to form
+a log analysis application.
+
+
+## Final Word
 
 This project is a work in progress, so please excuse if some of the examples
-or documentation isn't refined.  Or better yet, submit a pull request to
-contribute!
+or documentation aren't refined.  Or better yet, submit a pull request to
+contribute.

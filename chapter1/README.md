@@ -15,7 +15,9 @@ instructions on how to build and run those examples.
 
 ## The Basic Log Analyzer
 
-[[Insert link to plain Spark reference.]]
+Going through the [Quick Start](https://spark.apache.org/docs/latest/quick-start.html)
+and skimming the [Programming Guide](https://spark.apache.org/docs/latest/programming-guide.html)
+are helpful before going through this section.
 
 Before we begin using Spark, we'll need two things:
 
@@ -138,7 +140,8 @@ Now that we've walked through the code, try running that example.
 
 ## Spark SQL
 
-[[Insert link to Spark SQL.]]    
+The [Spark SQL Guide](https://spark.apache.org/docs/latest/sql-programming-guide.html)
+is a useful reference for this section.
 
 For those of you who are familiar with SQL, the same statistics we calculated
 in the previous example can be done using Spark SQL rather than calling
@@ -223,7 +226,10 @@ Try running [LogAnalyzerSQL.java](java8/src/main/com/databricks/apps/logs/LogAna
 
 ## Spark Streaming
 
-[[Insert link to the Spark Streaming Programming Guide.]]
+Please familiarize yourself with the concepts introducted in the
+[Spark Streaming Programming Guide](https://spark.apache.org/docs/latest/streaming-programming-guide.html)
+before beginning this section.  In particular, it defines DStreams which are an
+essential concept in understanding Spark Streaming.
 
 The earlier examples show us how to compute stats an old log file - but 
 in a production system, we want live monitoring of the server logs.
@@ -326,8 +332,10 @@ log file from another terminal.
 ### UpdateStateByKey
 
 If you really want to keep track of the log statistics for all of time, you'll
-need to maintain the state of the statistics between RDD's.  To do that,
-we'll introduce the UpdateStateByKey function of the streaming library
+need to maintain the state of the statistics between processing RDD's.  If you
+wish to compute keyed statistics and the number of keys is very large
+(i.e. too big to fit in memory on one machine), you can use the the
+UpdateStateByKey function of the Spark streaming library which we'll introduce
 in this section.
 
 First, to use UpdateStateByKey, we need to set up checkpointing on the streaming
@@ -387,14 +395,15 @@ contentSizes.foreachRDD(rdd -> {
 
 For the other statistics, since they make use of key value pairs, we can't 
 use static variables anymore.  The amount of state what we need to maintain
-is potentially too big to fit on one machine and needs to remain on Spark.  So
-for those stats, we'll make use of updateStateByKey which allows us to maintain
+is potentially too big to fit on one machine.  So
+for those stats, we'll make use of UpdateStateByKey which allows us to maintain
 a value for every key in our dataset.
  
 But before we can call updateStateByKey, we need to create a function to pass
 in as it's argument.  UpdateStateByKey takes in a different reduce function.
-This reduce function doesn't just take two values and outputs one, but it takes
-in a current value and an iterator of values, and outputs one new value.
+While our previous sum reducer just took in two values and output their sum, this
+reduce function takes in a current value and an iterator of values,
+and outputs one new value.
 ```java
 private static Function2<List<Long>, Optional<Long>, Optional<Long>>
    COMPUTE_RUNNING_SUM = (nums, current) -> {
@@ -406,7 +415,7 @@ private static Function2<List<Long>, Optional<Long>, Optional<Long>>
    };
 ```
 
-Now, we can compute the remaining statistics for all of time:
+Now, we can compute the actual keyed statistics for all of time:
 ```java
 // Compute Response Code to Count.
 // Note the use of updateStateByKey.
@@ -449,16 +458,12 @@ endpointCountsDStream.foreachRDD(rdd -> {
 Run [LogAnalyzerStreamingTotal.java](java8/src/main/com/databricks/apps/logs/LogAnalyzerStreamingTotal.java)
 now for yourself.
 
-## More computations
-[[TBW]]
+### Unittesting
 
-Illustrate calling an API on the data, such as for geo locating an ipaddress.
+Refactor this code for use in the sample app, and unittest it.
 
-### Joins
 
-### Broadcast variables
 
-### Accumulators
 
 
 
