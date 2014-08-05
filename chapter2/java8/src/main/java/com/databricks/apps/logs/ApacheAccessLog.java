@@ -1,6 +1,5 @@
 package com.databricks.apps.logs;
 
-import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -10,7 +9,7 @@ import java.util.regex.Pattern;
  * This class represents an Apache access log line.
  * See http://httpd.apache.org/docs/2.2/logs.html for more details.
  */
-public class ApacheAccessLog implements Serializable {
+public class ApacheAccessLog {
   private static final Logger logger = Logger.getLogger("Access");
 
   private String ipAddress;

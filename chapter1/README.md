@@ -15,8 +15,8 @@ instructions on how to build and run those examples.
 
 ## The Basic Log Analyzer
 
-Going through the [Quick Start](https://spark.apache.org/docs/latest/quick-start.html)
-and skimming the [Programming Guide](https://spark.apache.org/docs/latest/programming-guide.html)
+Going through the [Spark Quick Start](https://spark.apache.org/docs/latest/quick-start.html)
+and skimming the [Spark Programming Guide](https://spark.apache.org/docs/latest/programming-guide.html)
 are helpful before going through this section.
 
 Before we begin using Spark, we'll need two things:
@@ -63,7 +63,7 @@ public class LogAnalyzer {
     JavaRDD<ApacheAccessLog> accessLogs =
        logLines.map(ApacheAccessLog::parseFromLogLine).cache();
          
-    ...[Insert more code here] 
+    // TODO: Insert code here for calculating log statistics.
 
     sc.stop();
   }
@@ -166,7 +166,7 @@ public class LogAnalyzerSQL {
     JavaRDD<ApacheAccessLog> accessLogs = sc.textFile(logFile)
         .map(ApacheAccessLog::parseFromLogLine);
 
-    ...
+    // TODO: Insert code for computing log stats.
     
     sc.stop();
   }
@@ -179,7 +179,7 @@ as we've done with [ApacheAccessLog.java](src/main/java/com/databricks/apps/logs
 (Note: if you are using a different language besides Java, there is a different
 way to infer the table schema.  The examples in this directory work out of the
 box.  Or you can also refer to the
-[Spark Streaming Programming Guide](https://spark.apache.org/docs/latest/sql-programming-guide.html#rdds)
+[Spark SQL Guide on Data Sources](https://spark.apache.org/docs/latest/sql-programming-guide.html#data-sources)
 for more details.)
 ```java
 JavaSchemaRDD schemaRDD = sqlContext.applySchema(accessLogs, ApacheAccessLog.class).cache();
@@ -282,7 +282,7 @@ public class LogAnalyzerStreamingSQL {
     //   used to create the Java Streaming Context.
     JavaSQLContext sqlContext = new JavaSQLContext(sc);
     
-    ...Insert code here to process logs.
+    // TODO: Insert code here to process logs.
     
     // Start the streaming server.
     jssc.start();              // Start the computation
@@ -357,7 +357,7 @@ public class LogAnalyzerStreamingTotal {
     
     JavaDStream<ApacheAccessLog> accessLogs = logData.map(ApacheAccessLog::parseFromLogLine).cache();
     
-    ...
+    // TODO: Insert code for computing log stats.
     
     // Start the streaming server.
     jssc.start();              // Start the computation
@@ -457,10 +457,6 @@ endpointCountsDStream.foreachRDD(rdd -> {
 
 Run [LogAnalyzerStreamingTotal.java](java8/src/main/com/databricks/apps/logs/LogAnalyzerStreamingTotal.java)
 now for yourself.
-
-### Unittesting
-
-Refactor this code for use in the sample app, and unittest it.
 
 
 

@@ -15,13 +15,13 @@ import org.apache.spark.streaming.api.java.JavaStreamingContext;
  *   but instead of monitoring a socket, it monitors a directory and feeds
  *   in any new files to streaming.
  *
- * Once you get this program up and running, feed more apache access log files
- * into the directory.
+ * Once you get this program up and running, feed apache access log files
+ * into that directory.
  *
  * Example command to run:
  * %  ${YOUR_SPARK_HOME}/bin/spark-submit
- *     --class "com.databricks.apps.logs.chapter2.LogsAnalyzerImportStreamingFile"
- *     --master local[4]
+ *     --class "com.databricks.apps.logs.chapter2.LogAnalyzerStreamingImportDirectory"
+ *     --master spark://YOUR_SPARK_MASTER
  *     YOUR_LOCAL_LOGS_DIRECTORY
  *     target/log-analyzer-1.0.jar
  */
