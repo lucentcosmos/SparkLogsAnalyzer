@@ -62,12 +62,12 @@ error response codes.
 * With IPAddress as the user, and the endpoint being the movielens song, predict
 what movies someone would like to see.
 
-### Final Chapter: [Logs Analyis Application](app/README.md)
+### [Final Chapter: Logs Analyzer Application](app/README.md)
 
 This section puts together some of the code in the other chapters to form
 a log analysis application.  
 
-## Final Word
+## The End
 
 This project is a work in progress, so please excuse if some of the examples
 or documentation aren't refined.  Or better yet, submit a pull request to
