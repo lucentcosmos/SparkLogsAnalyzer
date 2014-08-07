@@ -1,4 +1,4 @@
-package com.databricks.apps.logs;
+package com.databricks.apps.logs.chapter1;
 
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
@@ -27,7 +27,7 @@ import java.util.List;
  *
  * Example command to run:
  * %  ${YOUR_SPARK_HOME}/bin/spark-submit
- *     --class "com.databricks.apps.logs.LogAnalyzerStreamingSQL"
+ *     --class "com.databricks.apps.logs.chapter1.LogAnalyzerStreamingSQL"
  *     --master local[4]
  *     target/log-analyzer-1.0.jar
  */
@@ -39,23 +39,25 @@ public class LogAnalyzerStreamingSQL {
 
   public static void main(String[] args) {
     SparkConf conf = new SparkConf().setAppName("Log Analyzer Streaming SQL");
-    JavaSparkContext sc = new JavaSparkContext(conf);
 
+    // Note: Only one Spark Context is created from the conf, the rest
+    //       are created from the original Spark context.
+    JavaSparkContext sc = new JavaSparkContext(conf);
     JavaStreamingContext jssc = new JavaStreamingContext(sc,
         SLIDE_INTERVAL);  // This sets the update window to be every 10 seconds.
-
-    JavaReceiverInputDStream<String> logData = jssc.socketTextStream("localhost", 9999);
-
-    // Create a SQL Context so SQL can be used.
-    // Note that this SQL context is initialized from the same JavaSparkContext
-    //   used to create the Java Streaming Context.
     JavaSQLContext sqlContext = new JavaSQLContext(sc);
 
+    JavaReceiverInputDStream<String> logDataDStream =
+        jssc.socketTextStream("localhost", 9999);
+
+
     // A DStream of RDD's that contain parsed Apache Access Logs.
-    JavaDStream<ApacheAccessLog> accessLogDStream = logData.map(ApacheAccessLog::parseFromLogLine).cache();
+    JavaDStream<ApacheAccessLog> accessLogDStream =
+        logDataDStream.map(ApacheAccessLog::parseFromLogLine).cache();
 
     // Splits the accessLogDStream into a dstream of time windowed rdd's.
-    JavaDStream<ApacheAccessLog> windowDStream = accessLogDStream.window(WINDOW_LENGTH, SLIDE_INTERVAL);
+    JavaDStream<ApacheAccessLog> windowDStream =
+        accessLogDStream.window(WINDOW_LENGTH, SLIDE_INTERVAL);
 
     windowDStream.foreachRDD(accessLogs -> {
       if (accessLogs.count() == 0) {
@@ -63,7 +65,7 @@ public class LogAnalyzerStreamingSQL {
         return null;
       }
 
-      // *** Note that this is code reused from LogAnalyzerSQL.java.
+      // *** Note that this is code copied verbatim from LogAnalyzerSQL.java.
       JavaSchemaRDD schemaRDD = sqlContext.applySchema(accessLogs, ApacheAccessLog.class).cache();
       schemaRDD.registerAsTable("logs");
 
@@ -72,30 +74,31 @@ public class LogAnalyzerStreamingSQL {
           sqlContext.sql("SELECT SUM(contentSize), COUNT(*), MIN(contentSize), MAX(contentSize) FROM logs")
               .map(row -> new Tuple4<>(row.getLong(0), row.getLong(1), row.getLong(2), row.getLong(3)))
               .first();
-      System.out.print("Content Size Avg: " + contentSizeStats._1() / contentSizeStats._2());
-      System.out.print(", Min: " + contentSizeStats._3());
-      System.out.println(", Max: " + contentSizeStats._4());
+      System.out.println(String.format("Content Size Avg: %s, Min: %s, Max: %s",
+          contentSizeStats._1() / contentSizeStats._2(),
+          contentSizeStats._3(),
+          contentSizeStats._4()));
 
       // Compute Response Code to Count.
       List<Tuple2<Integer, Long>> responseCodeToCount = sqlContext
           .sql("SELECT responseCode, COUNT(*) FROM logs GROUP BY responseCode")
           .mapToPair(row -> new Tuple2<>(row.getInt(0), row.getLong(1)))
           .take(1000);
-      System.out.println("Response code counts: " + responseCodeToCount);
+      System.out.println(String.format("Response code counts: %s", responseCodeToCount));
 
       // Any IPAddress that has accessed the server more than 10 times.
       List<String> ipAddresses = sqlContext
           .sql("SELECT ipAddress, COUNT(*) AS total FROM logs GROUP BY ipAddress HAVING total > 10")
           .map(row -> row.getString(0))
-          .take(100);
-      System.out.println("All IPAddresses > 10 times: " + ipAddresses);
+          .take(100);  // Take only 100 in case this is a super large data set.
+      System.out.println(String.format("IPAddresses > 10 times: %s", ipAddresses));
 
       // Top Endpoints.
       List<Tuple2<String, Long>> topEndpoints = sqlContext
           .sql("SELECT endpoint, COUNT(*) AS total FROM logs GROUP BY endpoint ORDER BY total DESC LIMIT 10")
           .map(row -> new Tuple2<>(row.getString(0), row.getLong(1)))
           .collect();
-      System.out.println("Top Endpoints: " + topEndpoints);
+      System.out.println(String.format("Top Endpoints: %s", topEndpoints));
 
       return null;
     });

@@ -1,4 +1,4 @@
-package com.databricks.apps.logs;
+package com.databricks.apps.logs.chapter1;
 
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
@@ -15,7 +15,7 @@ import java.util.List;
  *
  * Example command to run:
  * %  ${YOUR_SPARK_HOME}/bin/spark-submit
- *     --class "com.databricks.apps.logs.LogsAnalyzerSQL"
+ *     --class "com.databricks.apps.logs.chapter1.LogsAnalyzerSQL"
  *     --master local[4]
  *     target/log-analyzer-1.0.jar
  *     ../../data/apache.access.log
@@ -23,7 +23,7 @@ import java.util.List;
 public class LogAnalyzerSQL {
 
   public static void main(String[] args) {
-    // Create the spark context.
+    // Initialize the Spark context.
     SparkConf conf = new SparkConf().setAppName("Log Analyzer SQL");
     JavaSparkContext sc = new JavaSparkContext(conf);
     JavaSQLContext sqlContext = new JavaSQLContext(sc);

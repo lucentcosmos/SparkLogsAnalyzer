@@ -1,4 +1,4 @@
-package com.databricks.apps.logs;
+package com.databricks.apps.logs.chapter1;
 
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
@@ -26,7 +26,7 @@ import java.util.List;
  *
  * Example command to run:
  * %  ${YOUR_SPARK_HOME}/bin/spark-submit
- *     --class "com.databricks.apps.logs.LogsAnalyzerStreaming"
+ *     --class "com.databricks.apps.logs.chapter1.LogsAnalyzerStreaming"
  *     --master local[4]
  *     target/log-analyzer-1.0.jar
  */
@@ -58,13 +58,16 @@ public class LogAnalyzerStreaming {
     JavaStreamingContext jssc = new JavaStreamingContext(sc,
         SLIDE_INTERVAL);  // This sets the update window to be every 10 seconds.
 
-    JavaReceiverInputDStream<String> logData = jssc.socketTextStream("localhost", 9999);
+    JavaReceiverInputDStream<String> logDataDStream =
+        jssc.socketTextStream("localhost", 9999);
 
-    // A DStream of RDD's that contain parsed Apache Access Logs.
-    JavaDStream<ApacheAccessLog> accessLogDStream = logData.map(ApacheAccessLog::parseFromLogLine).cache();
+    // A DStream of Apache Access Logs.
+    JavaDStream<ApacheAccessLog> accessLogDStream =
+        logDataDStream.map(ApacheAccessLog::parseFromLogLine).cache();
 
     // Splits the accessLogDStream into a dstream of time windowed rdd's of apache access logs.
-    JavaDStream<ApacheAccessLog> windowDStream = accessLogDStream.window(WINDOW_LENGTH, SLIDE_INTERVAL);
+    JavaDStream<ApacheAccessLog> windowDStream =
+        accessLogDStream.window(WINDOW_LENGTH, SLIDE_INTERVAL);
 
     windowDStream.foreachRDD(accessLogs -> {
       if (accessLogs.count() == 0) {
@@ -72,20 +75,22 @@ public class LogAnalyzerStreaming {
         return null;
       }
 
-      // *** Note that this is code reused from LogAnalyzer.java.
+      // *** Note that this is code copied verbatim from LogAnalyzer.java.
 
       // Calculate statistics based on the content size.
-      JavaRDD<Long> contentSizes = accessLogs.map(ApacheAccessLog::getContentSize).cache();
-      System.out.print("Content Size Avg: " + contentSizes.reduce(SUM_REDUCER) / contentSizes.count());
-      System.out.print(", Min: " + contentSizes.min(Comparator.naturalOrder()));
-      System.out.println(", Max: " + contentSizes.max(Comparator.naturalOrder()));
+      JavaRDD<Long> contentSizes =
+          accessLogs.map(ApacheAccessLog::getContentSize).cache();
+      System.out.println(String.format("Content Size Avg: %s, Min: %s, Max: %s",
+          contentSizes.reduce(SUM_REDUCER) / contentSizes.count(),
+          contentSizes.min(Comparator.naturalOrder()),
+          contentSizes.max(Comparator.naturalOrder())));
 
       // Compute Response Code to Count.
       List<Tuple2<Integer, Long>> responseCodeToCount =
           accessLogs.mapToPair(log -> new Tuple2<>(log.getResponseCode(), 1L))
               .reduceByKey(SUM_REDUCER)
-              .take(1000);
-      System.out.println("Response code counts: " + responseCodeToCount);
+              .take(100);
+      System.out.println(String.format("Response code counts: %s", responseCodeToCount));
 
       // Any IPAddress that has accessed the server more than 10 times.
       List<String> ipAddresses =
@@ -94,14 +99,14 @@ public class LogAnalyzerStreaming {
               .filter(tuple -> tuple._2() > 10)
               .map(Tuple2::_1)
               .take(100);
-      System.out.println("IPAddresses > 10 times: " + ipAddresses);
+      System.out.println(String.format("IPAddresses > 10 times: %s", ipAddresses));
 
       // Top Endpoints.
       List<Tuple2<String, Long>> topEndpoints = accessLogs
           .mapToPair(log -> new Tuple2<>(log.getEndpoint(), 1L))
           .reduceByKey(SUM_REDUCER)
           .top(10, new ValueComparator<>(Comparator.<Long>naturalOrder()));
-      System.out.println("Top Endpoints: " + topEndpoints);
+      System.out.println(String.format("Top Endpoints: %s", topEndpoints));
 
       return null;
     });
