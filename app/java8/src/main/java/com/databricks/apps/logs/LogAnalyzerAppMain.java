@@ -8,7 +8,6 @@ import org.apache.spark.streaming.api.java.JavaPairDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
 import scala.Tuple2;
 
-import java.io.*;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
@@ -44,9 +43,9 @@ public class LogAnalyzerAppMain {
   private static final AtomicLong runningSum = new AtomicLong(0);
   private static final AtomicLong runningMin = new AtomicLong(Long.MAX_VALUE);
   private static final AtomicLong runningMax = new AtomicLong(Long.MIN_VALUE);
-  private static List<Tuple2<Integer, Long>> responseCodeCounts = null;
-  private static List<String> ipAddresses = null;
-  private static List<Tuple2<String, Long>> topEndpoints = null;
+  private static List<Tuple2<Integer, Long>> currentResponseCodeCounts = null;
+  private static List<String> currentIPAddresses = null;
+  private static List<Tuple2<String, Long>> currentTopEndpoints = null;
 
   private static LogStatistics lastWindowStatistics = null;
 
@@ -72,10 +71,11 @@ public class LogAnalyzerAppMain {
     JavaDStream<ApacheAccessLog> accessLogsDStream
         = logData.map(ApacheAccessLog::parseFromLogLine).cache();
 
+
     // Calculate statistics based on the content size, and update the static variables to track this.
-    JavaDStream<Long> contentSizes = accessLogsDStream.map(
-        ApacheAccessLog::getContentSize).cache();
-    contentSizes.foreachRDD(rdd -> {
+    JavaDStream<Long> contentSizeDStream =
+        accessLogDStream.map(ApacheAccessLog::getContentSize).cache();
+    contentSizeDStream.foreachRDD(rdd -> {
       if (rdd.count() > 0) {
         runningSum.getAndAdd(rdd.reduce(LogFunctions.SUM_REDUCER));
         runningCount.getAndAdd(rdd.count());
@@ -87,19 +87,18 @@ public class LogAnalyzerAppMain {
       return null;
     });
 
-    // Compute Response Code to Count.
-    // Note the use of updateStateByKey.
-    JavaPairDStream<Integer, Long> responseCodeCount =
-        accessLogsDStream.mapToPair(s -> new Tuple2<>(s.getResponseCode(), 1L))
-            .reduceByKey(LogFunctions.SUM_REDUCER);
-    JavaPairDStream<Integer, Long> allResponseCodeCount =
-        responseCodeCount.updateStateByKey(LogFunctions.COMPUTE_RUNNING_SUM);
-    allResponseCodeCount.foreachRDD(rdd -> {
-      responseCodeCounts = rdd.take(100);
+
+    // A DStream of Resonse Code Counts;
+    JavaPairDStream<Integer, Long> responseCodeCountDStream = accessLogDStream
+        .mapToPair(s -> new Tuple2<>(s.getResponseCode(), 1L))
+        .reduceByKey(SUM_REDUCER)
+        .updateStateByKey(COMPUTE_RUNNING_SUM);
+    responseCodeCountDStream.foreachRDD(rdd -> {
+      currentResponseCodeCounts = rdd.take(100);
       return null;
     });
 
-    // A DStream of endpoint to count.
+    // A DStream of ipAddressCounts.
     JavaDStream<String> ipAddressesDStream = accessLogsDStream
         .mapToPair(s -> new Tuple2<>(s.getIpAddress(), 1L))
         .reduceByKey(LogFunctions.SUM_REDUCER)
@@ -107,7 +106,7 @@ public class LogAnalyzerAppMain {
         .filter(tuple -> tuple._2() > 10)
         .map(Tuple2::_1);
     ipAddressesDStream.foreachRDD(rdd -> {
-      ipAddresses = rdd.take(100);
+      currentIPAddresses = rdd.take(100);
       return null;
     });
 
@@ -117,7 +116,7 @@ public class LogAnalyzerAppMain {
         .reduceByKey(LogFunctions.SUM_REDUCER)
         .updateStateByKey(LogFunctions.COMPUTE_RUNNING_SUM);
     endpointCountsDStream.foreachRDD(rdd -> {
-     topEndpoints = rdd.takeOrdered(10,
+     currentTopEndpoints = rdd.takeOrdered(10,
          new LogFunctions.ValueComparator<>(Comparator.<Long>naturalOrder()));
       return null;
     });
@@ -157,9 +156,9 @@ public class LogAnalyzerAppMain {
           runningMin.get(),
           runningMax.get()));
     }
-    out.write(String.format("Response code counts: %s\n", responseCodeCounts));
-    out.write(String.format("IPAddresses > 10 times: %s\n", ipAddresses));
-    out.write(String.format("Top Endpoints: %s\n", topEndpoints));
+    out.write(String.format("Response code counts: %s\n", currentResponseCodeCounts));
+    out.write(String.format("IPAddresses > 10 times: %s\n", currentIPAddresses));
+    out.write(String.format("Top Endpoints: %s\n", currentTopEndpoints));
 
     out.write("\n");
 

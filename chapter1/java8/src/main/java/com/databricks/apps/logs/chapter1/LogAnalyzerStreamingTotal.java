@@ -1,4 +1,4 @@
-package com.databricks.apps.logs;
+package com.databricks.apps.logs.chapter1;
 
 import com.google.common.base.Optional;
 import org.apache.spark.SparkConf;
@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.AtomicLong;
  *
  * Example command to run:
  * %  ${YOUR_SPARK_HOME}/bin/spark-submit
- *     --class "com.databricks.apps.logs.LogAnalyzerStreamingTotal"
+ *     --class "com.databricks.apps.logs.chapter1.LogAnalyzerStreamingTotal"
  *     --master local[4]
  *     target/log-analyzer-1.0.jar
  */
@@ -76,40 +76,41 @@ public class LogAnalyzerStreamingTotal {
     // Checkpointing must be enabled to use the updateStateByKey function.
     jssc.checkpoint("/tmp/log-analyzer-streaming");
 
-    JavaReceiverInputDStream<String> logData = jssc.socketTextStream("localhost", 9999);
+    JavaReceiverInputDStream<String> logDataDStream =
+        jssc.socketTextStream("localhost", 9999);
 
-    // A DStream of RDD's that contain parsed Apache Access Logs.
-    JavaDStream<ApacheAccessLog> accessLogs = logData.map(ApacheAccessLog::parseFromLogLine).cache();
+    JavaDStream<ApacheAccessLog> accessLogDStream =
+        logDataDStream.map(ApacheAccessLog::parseFromLogLine).cache();
 
     // Calculate statistics based on the content size, and update the static variables to track this.
-    JavaDStream<Long> contentSizes = accessLogs.map(ApacheAccessLog::getContentSize).cache();
-    contentSizes.foreachRDD(rdd -> {
+    JavaDStream<Long> contentSizeDStream =
+        accessLogDStream.map(ApacheAccessLog::getContentSize).cache();
+    contentSizeDStream.foreachRDD(rdd -> {
       if (rdd.count() > 0) {
         runningSum.getAndAdd(rdd.reduce(SUM_REDUCER));
         runningCount.getAndAdd(rdd.count());
         runningMin.set(Math.min(runningMin.get(), rdd.min(Comparator.naturalOrder())));
         runningMax.set(Math.max(runningMax.get(), rdd.max(Comparator.naturalOrder())));
-        System.out.print("Content Size Avg: " +  runningSum.get() / runningCount.get());
+        System.out.print("Content Size Avg: " + runningSum.get() / runningCount.get());
         System.out.print(", Min: " + runningMin.get());
         System.out.println(", Max: " + runningMax.get());
       }
       return null;
     });
 
-   // Compute Response Code to Count.
-   // Note the use of updateStateByKey.
-   JavaPairDStream<Integer, Long> responseCodeCount =
-       accessLogs.mapToPair(s -> new Tuple2<>(s.getResponseCode(), 1L))
-           .reduceByKey(SUM_REDUCER);
-    JavaPairDStream<Integer, Long> allResponseCodeCount =
-        responseCodeCount.updateStateByKey(COMPUTE_RUNNING_SUM);
-    allResponseCodeCount.foreachRDD(rdd -> {
+    // Compute Response Code to Count.
+    // Note the use of updateStateByKey.
+    JavaPairDStream<Integer, Long> responseCodeCountDStream = accessLogDStream
+        .mapToPair(s -> new Tuple2<>(s.getResponseCode(), 1L))
+        .reduceByKey(SUM_REDUCER)
+        .updateStateByKey(COMPUTE_RUNNING_SUM);
+    responseCodeCountDStream.foreachRDD(rdd -> {
       System.out.println("Response code counts: " + rdd.take(100));
       return null;
     });
 
-    // A DStream of endpoint to count.
-    JavaDStream<String> ipAddressesDStream = accessLogs
+    // A DStream of ipAddresses accessed > 10 times.
+    JavaDStream<String> ipAddressesDStream = accessLogDStream
         .mapToPair(s -> new Tuple2<>(s.getIpAddress(), 1L))
         .reduceByKey(SUM_REDUCER)
         .updateStateByKey(COMPUTE_RUNNING_SUM)
@@ -122,7 +123,7 @@ public class LogAnalyzerStreamingTotal {
     });
 
     // A DStream of endpoint to count.
-    JavaPairDStream<String, Long> endpointCountsDStream = accessLogs
+    JavaPairDStream<String, Long> endpointCountsDStream = accessLogDStream
         .mapToPair(s -> new Tuple2<>(s.getEndpoint(), 1L))
         .reduceByKey(SUM_REDUCER)
         .updateStateByKey(COMPUTE_RUNNING_SUM);
