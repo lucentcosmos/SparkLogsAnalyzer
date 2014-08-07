@@ -3,11 +3,17 @@ package com.databricks.apps.logs;
 import scala.Tuple2;
 import scala.Tuple4;
 
-import java.io.IOException;
-import java.io.Writer;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-public class LogStatistics {
+public class LogStatistics implements Serializable {
+  public final static LogStatistics EMPTY_LOG_STATISTICS =
+      new LogStatistics(new Tuple4<>(0L, 0L, 0L, 0L), new ArrayList<>(),
+          new ArrayList<>(), new ArrayList<>());
+
   private Tuple4<Long, Long, Long, Long> contentSizeStats;
   private List<Tuple2<Integer, Long>> responseCodeToCount;
   private List<String> ipAddresses;
@@ -27,8 +33,12 @@ public class LogStatistics {
     return contentSizeStats;
   }
 
-  public List<Tuple2<Integer, Long>> getResponseCodeToCount() {
-    return responseCodeToCount;
+  public Map<Integer, Long> getResponseCodeToCount() {
+    Map<Integer, Long> responseCodeCount = new HashMap<>();
+    for (Tuple2<Integer, Long> tuple: responseCodeToCount) {
+      responseCodeCount.put(tuple._1(), tuple._2());
+    }
+    return responseCodeCount;
   }
 
   public List<String> getIpAddresses() {
@@ -37,18 +47,5 @@ public class LogStatistics {
 
   public List<Tuple2<String, Long>> getTopEndpoints() {
     return topEndpoints;
-  }
-
-  public void writeToFile(Writer out) throws IOException {
-    out.write(String.format("Content Size Avg: %s, Min: %s, Max: %s\n",
-        contentSizeStats._1() / contentSizeStats._2(),
-        contentSizeStats._3(),
-        contentSizeStats._4()));
-
-    out.write(String.format("Response code counts: %s\n", responseCodeToCount));
-
-    out.write(String.format("IPAddresses > 10 times: %s\n", ipAddresses));
-
-    out.write(String.format("Top Endpoints: %s\n", topEndpoints));
   }
 }

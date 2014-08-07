@@ -13,8 +13,7 @@ data.  If not, you can use the sample one provided at
  [ApacheAccessLog.java](src/main/java/com/databricks/apps/log/ApacheAccessLog.java).
 
 The example code uses an Apache access log file since that's a well known
-format.  It would be easy to rewrite the parser for a different
-log format.
+and common log format.  It would be easy to rewrite the parser for a different log format if needed.
 
 The following statistics will be computed:
 
@@ -26,8 +25,8 @@ The following statistics will be computed:
 Before we run anything, let's understand the code.
 
 The main body of a simple Spark application is below.
-The first step is to bring up a Spark context.  Then Spark context
-can load data from a text file as an RDD which can be processed.  Finally, before exiting the function, we stop the Spark context.
+The first step is to bring up a Spark context.  Then  the Spark context
+can load data from a text file as an RDD, which can then process.  Finally, before exiting the function, we stop the Spark context.
 
 ```java
 public class LogAnalyzer {
@@ -51,8 +50,8 @@ public class LogAnalyzer {
 }
 ```
 
-Given an RDD of log lines, use the map function to transform each line
-to an ApacheAccessLog object.  That RDD should be cached in memory,
+Given an RDD of log lines, use the ```map``` function to transform each line
+to an ApacheAccessLog object.  The ApacheAccessLog RDD is cached in memory,
 since multiple transformations and actions will be called on it.
 
 ```java
@@ -70,9 +69,9 @@ private static Function2<Long, Long, Long> SUM_REDUCER = (a, b) -> a + b;
 ```
 
 Next, let's calculate the average, minimum, and maximum content size of the
-response returned.  A map transformation extracts the content sizes, and
-then different actions(reduce, count, min, and max) are called to output
-the different stats.  Again, caching is used to avoid repeating computation.
+response returned.  A ```map``` transformation extracts the content sizes, and
+then different actions (```reduce```, ```count```, ```min```, and ```max```) are called to output
+various stats.  Again, call ```cache``` the context size RDD to avoid repeating computation.
 
 ```java
 // Calculate statistics based on the content size.
@@ -86,11 +85,10 @@ System.out.println(String.format("Content Size Avg: %s, Min: %s, Max: %s",
     contentSizes.max(Comparator.naturalOrder())));
 ```
 
-To compute the response code counts, we have to work with key-value pairs - notice
-the use of the mapToPair and reduceByKey transformations.
-Note also that we call take(100) instead of collect() to gather the final output of the response code counts.
+To compute the response code counts, we have to work with key-value pairs - by using ```mapToPair``` and ```reduceByKey```.
+Notice that we call ```take(100)``` instead of ```collect()``` to gather the final output of the response code counts.
 That's just to be safe since it could take a really long time to call
-collect() on a very large dataset.  This is recommended practice.
+```collect()``` on a very large dataset.
 
 ```java
 // Compute Response Code to Count.
@@ -102,7 +100,7 @@ System.out.println(String.format("Response code counts: %s", responseCodeToCount
 ```
 
 To compute any IPAddress that has accessed this server more than 10 times,
-we call the filter tranformation and then map to retrieve only the IPAddress and not the count.  Again we use take(100) to retrieve the values.
+we call the ```filter``` tranformation and then ```map``` to retrieve only the IPAddress and not the count.  Again we use ```take(100)``` to retrieve the values.
 ```java
 List<String> ipAddresses =
     accessLogs.mapToPair(log -> new Tuple2<>(log.getIpAddress(), 1L))
@@ -114,9 +112,8 @@ System.out.println(String.format("IPAddresses > 10 times: %s", ipAddresses));
 ```
 
 Last let's calculate the top endpoints requested in this log file. We define
-an inner class, ValueComparator to help with that.  This function tells us,
-given two tuples, which one is first in ordering.  This Comparator ignores
-the key of the tuple, and just returns the ordering based on the value.
+an inner class, ```ValueComparator``` to help with that.  This function tells us,
+given two tuples, which one is first in ordering.  The key of the tuple is ignored, and ordering is based just on the values.
 
 ```java
 private static class ValueComparator<K, V>
@@ -134,9 +131,7 @@ private static class ValueComparator<K, V>
 }
 ```
 
-Then, we can use the ValueComparator in the top action to compute the top
-endpoints accessed on this server according to how many times the endpoint
-was accessed.
+Then, we can use the ```ValueComparator``` with the ```top``` action to compute the top endpoints accessed on this server according to how many times the endpoint was accessed.
 
 ```java
 List<Tuple2<String, Long>> topEndpoints = accessLogs

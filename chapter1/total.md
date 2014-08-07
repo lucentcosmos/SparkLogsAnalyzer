@@ -2,17 +2,15 @@
 
 If you really want to keep track of the log statistics for all of time, you'll
 need to maintain the state of the statistics between processing RDD's.  Spark
-Streaming doesn't keep all the data for all of time or we'd run out of memory -
-it knows when an RDD is no longer needed and drops that.
+Streaming doesn't keep all the data for all of time or there would be no more memory - it knows when an RDD is no longer needed and drops those objects.
 
 If you wish to compute keyed statistics and the number of keys is very large
 (i.e. too big to fit in memory on one machine), you can't maintain all the
-state you are trying to save in memory - you'll need Spark to maintain the
-state for you.  To do that, you can use the
-UpdateStateByKey function of the Spark streaming library.
+state you are trying to save in your main program - you'll need Spark to maintain the state for you.  To do that, use the
+```updateStateByKey``` function of the Spark Streaming library.
 
-First, to use UpdateStateByKey, we need to set up checkpointing on the streaming
-context because we are maintaining state.  To do that, just call checkpoint
+First, to use ```updateStateByKey```, we need to set up checkpointing on the streaming
+context because we are maintaining state.  To do that, just call ```checkpoint```
 on the streaming context with a directory to write the checkpoint data:
 ```java
 public class LogAnalyzerStreamingTotal {
@@ -44,7 +42,7 @@ private static final AtomicLong runningMin = new AtomicLong(Long.MAX_VALUE);
 private static final AtomicLong runningMax = new AtomicLong(Long.MIN_VALUE);
 ```
 
-We call map on the Ac
+We call map on the AccessLogDStream to retrieve a contentSizeDStream.
 Now, we can just update the values for these static variables by calling
 foreachRDD on the contentSizeDstream:
 ```java
@@ -66,11 +64,11 @@ contentSizeDStream.foreachRDD(rdd -> {
 
 For the other statistics, since they make use of key value pairs, we can't
 use static variables anymore.  The amount of state what we need to maintain
-is potentially too big to fit on one machine.  So
-for those stats, we'll make use of UpdateStateByKey which allows us to maintain
+is potentially too big to fit in memory.  So
+for those stats, we'll make use of ```updateStateByKey``` which allows us to maintain
 a value for every key in our dataset.
 
-But before we can call updateStateByKey, we need to create a function to pass into it.  UpdateStateByKey takes in a different reduce function.
+But before we can call ```updateStateByKey```, we need to create a function to pass into it.  ```updateStateByKey``` takes in a different reduce function.
 While our previous sum reducer just took in two values and output their sum, this
 reduce function takes in a current value and an iterator of values,
 and outputs one new value.

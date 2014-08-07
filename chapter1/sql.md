@@ -10,7 +10,7 @@ here.
 
 First, we need to create a SQL Spark context. Note how we create one Spark
 Context, and then use that to instantiate different flavors of Spark contexts.
-You should not initialize multiple Spark contexts in one process.
+You should not initialize multiple Spark contexts from the SparkConf in one process.
 ```java
 public class LogAnalyzerSQL {
   public static void main(String[] args) {
@@ -83,7 +83,6 @@ List<Tuple2<String, Long>> topEndpoints = sqlContext
 System.out.println(String.format("Top Endpoints: %s", topEndpoints));
 ```
 
-One thing to note though is that Spark SQL does not allow you to name a variable by a reserved keyword - meaning it would not allow ```SELECT COUNT(*) AS count```, but ```SELECT COUNT(*) AS the_count``` is fine.
-
+One thing to note though is that Spark SQL does not allow using reserved keyworks as alias names.  In other words, ```SELECT COUNT(*) AS count``` will not work, but ```SELECT COUNT(*) AS the_count``` does.
 
 Try running [LogAnalyzerSQL.java](java8/src/main/com/databricks/apps/logs/LogAnalyzer.java) now.

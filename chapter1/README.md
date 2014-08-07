@@ -10,16 +10,9 @@ In this explanation, the code snippets are in Java 8.  However,
 there is also sample code in [Java 6](java6), [Scala](scala), and [Python](python)
 included in this directory.  Refer to the README's in those folders for
 instructions on how to build and run those examples.
-(Note that at the time this was written, streaming has not yet been supported
- in python, so streaming is omitted in that example.)
 
- This chapter includes the following examples:
+This chapter covers the following topics:
 
  1. [First Log Analyzer](spark.md) - This is a first Spark standalone logs analysis application.
- 1. [Spark SQL](sql.md) - This example does the same thing as the above example, but uses SQL syntax instead of Spark transformations and actions.
- 1. [Spark Streaming](streaming.md) - This example covers how to calculate log statistics using the streaming library.
-
-
-
-
-
+ * [Spark SQL](sql.md) - This example does the same thing as the above example, but uses SQL syntax instead of Spark transformations and actions.
+ * [Spark Streaming](streaming.md) - This example covers how to calculate log statistics using the streaming library.

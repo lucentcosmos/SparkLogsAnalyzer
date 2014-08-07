@@ -21,7 +21,7 @@ systems, so we'll even touch other technologies that are compatible with Spark -
 This project is broken up into chapters with bite-sized examples for
 demonstrating new Spark functionality for logs processing.  This makes
 the examples easy to run and learn as they cover just one new topic at a time.
-At the end, we put a few of these examples together to form a logs
+At the end, we assemble some of these examples to form a sample logs
 analyzer application.
 
 ###[Chapter 1: Introduction to Apache Spark](chapter1/README.md)
@@ -32,39 +32,15 @@ end of this chapter, a reader will know how to do queries with Apache Spark.
 
 ###[Chapter 2: Importing and Exporting Data](chapter2/README.md)
 
-This chapter includes examples to illustrate how to get your data into
-Spark - both batch import of data, as well as streaming data import
-for Spark Streaming.  It also covers how to export the data processed with
-Spark so that it can be served in your production systems.
-
-### Chapter 3: More Spark
-
-Chapter 3 is not yet written, but ideas for content include:
-
-* Unittesting.
-* Illustrate calling an API on the data, such as for geo locating an ipaddress.
-* Joins.
-* Broadcast variables.
-* Accumulators.
-
-### Chapter 4: Intelligence with Spark
-
-Chapter 4 is not yet written, but here are some examples of what may be
-written:
-
-* Auto detect if an endpoint is suddenly throwing an usually high number of
-error response codes.
-* Collect a bunch of log lines and provide live grep capabilities.
-* With IPAddress as the user, and the endpoint representing a movie, predict
-what movies someone would like to see.
+This chapter includes examples to illustrate how to get your data in
+and out of Spark.  It is also recommended that you bring up a local Spark cluster, as you should know how to run Spark on a dataset that is too
+big to fit on one machine.
 
 ### [Final Chapter: Logs Analyzer Application](app/README.md)
 
 This section puts together some of the code in the other chapters to form
 a sample log analysis application.
 
-## The End
+## More to come...
 
-This project is a work in progress, so please excuse if some of the examples
-or documentation aren't refined.  Or better yet, submit a pull request to
-contribute!
+While that's all for now, there's definitely more to come - expect more features to the log reference application over time.

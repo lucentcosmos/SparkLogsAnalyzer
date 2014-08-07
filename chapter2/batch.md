@@ -15,9 +15,11 @@ cause failures.
 NFS or some other network file system would suffice, but NFS isn't fault tolerant
 to machine failures and if your dataset is too
 big to fit on one NFS volume, it could be cumbersome to partition your data and
-store them on multiple volumes and track them.  Instead, HDFS and S3 are better
-file systems for massive datasets, and this section will cover how to
-read data from those sources.
+store them on multiple volumes and track them.
+
+HDFS and S3 are better
+file systems for massive datasets, and this section will have examples shows
+how to read data from those sources.
 
 * S3 is an Amazon AWS solution for storing files in the cloud, easily
 accessible to all.
@@ -49,7 +51,7 @@ internet).
 
 HDFS is a file system that is meant for storing large data sets and being fault
 tolerant.  This section covers how to set up HDFS locally on your machine,
-and run a streaming example on HDFS.  In a production system, your Spark cluster
+and run a batch import example on HDFS.  In a production system, your Spark cluster
 should ideally be on the same machines as your Hadoop cluster to make it easy to
 read files.  Note: Spark must be compiled with the same HDFS version as the one
 on your clusters.
@@ -59,5 +61,5 @@ on your clusters.
 Run [LogAnalyzerBatchImport.java](src/main/java/com/databricks/apps/logs/chapter2/LogAnalyzerBatchImport.java)
 while copying files into HDFS.
 
-Note that there are other Hadoop Compatible File Systems, and this same code
-would work on those systems as well.
+Note that there are other Hadoop Compatible File Systems, and the same code
+would work on any of them.
