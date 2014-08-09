@@ -22,4 +22,4 @@ Or you can run the program in your IDE by setting a JVM Parameter
 ```
 
 Note: It is very helpful to set the log4j logging level to be WARN when
-running these examples..
+running these examples.

@@ -1,13 +1,14 @@
 # Exporting Small Datasets
 
 If the data you are exporting out of Spark is small, you can just use an
-action to convert the RDD into objects in memory on the driver program, and then
-write that output directly to any data storage solution of your choosing.
-You may remember that we called the take(N) action where N
-is some finite number instead of the collect() action to ensure the output
+action to convert the RDD into objects in memory on the driver program, and then write that output directly to any data storage solution of your
+choosing.  You may remember that we called the ```take(N)``` action where N
+is some finite number instead of the ```collect()``` action to ensure the output
 fits in memory - no matter how big the input data set may be - this is good
-practice.  This ection walks through example code where you'll write the
+practice.  This section walks through example code where you'll write the
 log statistics to a file.
+
+It may not be that useful to have these stats output to a file - in practice, you might write these statistics to a database for your presentation layer to access.
 
 ```java
 LogStatistics logStatistics = logAnalyzerRDD.processRdd(accessLogs);
@@ -38,5 +39,3 @@ out.close();
 
 Now, run [LogAnalyzerExportSmallData.java](src/main/java/com/databricks/apps/logs/chapter2/LogAnalyzerExportSmallData.java).
 
-It may not be that useful to have these stats output to a file - in an actual
-production system, you would probably write these stats to a database instead.

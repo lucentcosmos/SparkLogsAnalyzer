@@ -1,11 +1,12 @@
 # Logs Analyzer Application
 
-This directory contains code snippets in the chapters, assembled together to form
-a sample logs analyzer application.  These are the features of our MVP
-(minimal viable product) logs analyzer application.
+This directory contains code from the chapters, assembled together to form
+a sample logs analyzer application.  Other libraries that are not discussed 
+have been pulled in for making this a more polished application.
+These are the features of our MVP (minimal viable product) logs analyzer application.
 
-* Read in new log files from a directory and input those new files into streaming.
-* Compute stats on the logs using Spark SQL - stats for the last 30 seconds are calculated as well as for all of timee
+* Reads in new log files from a directory and inputs those new files into Spark Streaming.
+* Compute stats on the logs using Spark - stats for the last 30 seconds are calculated as well as for all of time.
 * Write the calculated stats to an txt file on the local file system that gets
   refreshed on a set interval.
 
