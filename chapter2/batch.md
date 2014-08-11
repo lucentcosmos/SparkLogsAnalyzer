@@ -58,7 +58,7 @@ on your clusters.
 
 [[TODO: Install a local HDFS, and run the example.]]
 
-Run [LogAnalyzerBatchImport.java](src/main/java/com/databricks/apps/logs/chapter2/LogAnalyzerBatchImport.java)
+Run [LogAnalyzerBatchImport.java](java8/src/main/java/com/databricks/apps/logs/chapter2/LogAnalyzerBatchImport.java)
 while copying files into HDFS.
 
 Note that there are other Hadoop Compatible File Systems, and the same code

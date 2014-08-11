@@ -122,5 +122,5 @@ endpointCountsDStream.foreachRDD(rdd -> {
 });
 ```
 
-Run [LogAnalyzerStreamingTotal.java](java8/src/main/com/databricks/apps/logs/chapter1/LogAnalyzerStreamingTotal.java)
+Run [LogAnalyzerStreamingTotal.java](java8/src/main/java/com/databricks/apps/logs/chapter1/LogAnalyzerStreamingTotal.java)
 now for yourself.
