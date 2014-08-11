@@ -1,8 +1,9 @@
-package com.databricks.apps.logs
+package com.databricks.apps.logs.chapter1
 
+import com.databricks.apps.logs.{ApacheAccessLog, OrderingUtils}
+import org.apache.spark.{SparkContext, SparkConf}
+import org.apache.spark.streaming.{StreamingContext, Duration}
 import org.apache.spark.SparkContext._
-import org.apache.spark.streaming._
-import org.apache.spark.{SparkConf, SparkContext}
 
 /**
  * The LogAnalyzerStreaming illustrates how to use logs with Spark Streaming to
@@ -16,7 +17,7 @@ import org.apache.spark.{SparkConf, SparkContext}
  *
  * Example command to run:
  * % spark-submit
- *   --class "com.databricks.apps.logs.LogAnalyzerStreaming"
+ *   --class "com.databricks.apps.logs.chapter1.LogAnalyzerStreaming"
  *   --master local[4]
  *   target/scala-2.10/spark-logs-analyzer_2.10-1.0.jar
  */

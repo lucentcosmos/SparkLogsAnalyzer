@@ -1,11 +1,11 @@
-package com.databricks.apps.logs
+package com.databricks.apps.logs.chapter1
 
 import java.util.concurrent.atomic.AtomicLong
 
-import org.apache.spark.streaming.StreamingContext._
+import com.databricks.apps.logs.{ApacheAccessLog, OrderingUtils}
+import org.apache.spark.{SparkContext, SparkConf}
 import org.apache.spark.streaming._
-import org.apache.spark.{SparkConf, SparkContext}
-
+import org.apache.spark.streaming.StreamingContext._
 import scala.math._
 
 /**
@@ -22,7 +22,7 @@ import scala.math._
  *
  * Example command to run:
  * % spark-submit
- *   --class "com.databricks.apps.logs.LogAnalyzerStreaming"
+ *   --class "com.databricks.apps.logs.chapter1.LogAnalyzerStreaming"
  *   --master local[4]
  *   target/scala-2.10/spark-logs-analyzer_2.10-1.0.jar
  */
