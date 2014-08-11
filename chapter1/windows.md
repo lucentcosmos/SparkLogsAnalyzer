@@ -77,5 +77,5 @@ windowDStream.foreachRDD(accessLogs -> {
 }
 ```
 
-Now that we've walked through the code, run [LogAnalyzerStreaming.java](java8/src/main/com/databricks/apps/logs/LogAnalyzerStreaming.java)
-and/or [LogAnalyzerStreamingSQL.java](java8/src/main/com/databricks/apps/logs/LogAnalyzerStreamingSQL.java) now.
+Now that we've walked through the code, run [LogAnalyzerStreaming.java](java8/src/main/com/databricks/apps/logs/chapter1/LogAnalyzerStreaming.java)
+and/or [LogAnalyzerStreamingSQL.java](java8/src/main/com/databricks/apps/logs/chapter1/LogAnalyzerStreamingSQL.java) now.

@@ -36,7 +36,7 @@ public class LogAnalyzerSQL {
 
 Next, we need a way to register our logs data into a table.  In Java, Spark SQL
 can infer the table schema on a standard Java POJO - with getters and setters
-as we've done with [ApacheAccessLog.java](src/main/java/com/databricks/apps/logs/ApacheAccessLog.java).
+as we've done with [ApacheAccessLog.java](java8/src/main/java/com/databricks/apps/logs/ApacheAccessLog.java).
 (Note: if you are using a different language besides Java, there is a different
 way for Spark to infer the table schema.  The examples in this directory work out of the
 box.  Or you can also refer to the
@@ -85,4 +85,4 @@ System.out.println(String.format("Top Endpoints: %s", topEndpoints));
 
 One thing to note though is that Spark SQL does not allow using reserved keyworks as alias names.  In other words, ```SELECT COUNT(*) AS count``` will not work, but ```SELECT COUNT(*) AS the_count``` does.
 
-Try running [LogAnalyzerSQL.java](java8/src/main/com/databricks/apps/logs/LogAnalyzer.java) now.
+Try running [LogAnalyzerSQL.java](java8/src/main/com/databricks/apps/logs/chapter1/LogAnalyzerSQL.java) now.

@@ -1,14 +1,15 @@
-package com.databricks.apps.logs
+package com.databricks.apps.logs.chapter1
 
-import org.apache.spark.{SparkConf, SparkContext}
+import com.databricks.apps.logs.ApacheAccessLog
 import org.apache.spark.sql.SQLContext
+import org.apache.spark.{SparkContext, SparkConf}
 
 /**
  * LogAnalyzerSQL shows how to use SQL syntax with Spark.
  *
  * Example command to run:
  * % spark-submit
- *   --class "com.databricks.apps.logs.LogAnalyzerSQL"
+ *   --class "com.databricks.apps.logs.chapter1.LogAnalyzerSQL"
  *   --master local[4]
  *   target/scala-2.10/spark-logs-analyzer_2.10-1.0.jar
  *   ../../data/apache.access.log
@@ -21,7 +22,6 @@ object LogAnalyzerSQL {
     val logFile = args(0)
 
     val sqlContext = new SQLContext(sc)
-
     import sqlContext.createSchemaRDD
 
     val accessLogs = sc.textFile(logFile).map(ApacheAccessLog.parseLogLine).cache()

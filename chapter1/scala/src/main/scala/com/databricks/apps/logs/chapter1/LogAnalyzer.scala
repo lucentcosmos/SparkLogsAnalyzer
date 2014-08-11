@@ -1,7 +1,8 @@
-package com.databricks.apps.logs
+package com.databricks.apps.logs.chapter1
 
+import com.databricks.apps.logs.{ApacheAccessLog, OrderingUtils}
+import org.apache.spark.{SparkContext, SparkConf}
 import org.apache.spark.SparkContext._
-import org.apache.spark.{SparkConf, SparkContext}
 
 /**
  * The LogAnalyzer takes in an apache access log file and
@@ -9,7 +10,7 @@ import org.apache.spark.{SparkConf, SparkContext}
  *
  * Example command to run:
  * % spark-submit
- *   --class "com.databricks.apps.logs.LogAnalyzer"
+ *   --class "com.databricks.apps.logs.chapter1.LogAnalyzer"
  *   --master local[4]
  *   target/scala-2.10/spark-logs-analyzer_2.10-1.0.jar
  *   ../../data/apache.access.log

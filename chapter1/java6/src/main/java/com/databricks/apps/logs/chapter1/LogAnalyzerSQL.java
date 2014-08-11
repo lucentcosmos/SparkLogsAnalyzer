@@ -1,5 +1,7 @@
-package com.databricks.apps.logs;
+package com.databricks.apps.logs.chapter1;
 
+import com.databricks.apps.logs.ApacheAccessLog;
+import com.databricks.apps.logs.Functions;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
@@ -18,13 +20,12 @@ import java.util.List;
  *
  * Example command to run:
  * %  ${YOUR_SPARK_HOME}/bin/spark-submit
- *     --class "com.databricks.apps.logs.LogsAnalyzerSQL"
+ *     --class "com.databricks.apps.logs.chapter1.LogsAnalyzerSQL"
  *     --master local[4]
  *     target/log-analyzer-1.0.jar
  *     ../../data/apache.access.log
  */
 public class LogAnalyzerSQL {
-
   public static void main(String[] args) {
     SparkConf conf = new SparkConf().setAppName("Log Analyzer SQL");
     JavaSparkContext sc = new JavaSparkContext(conf);
@@ -35,15 +36,11 @@ public class LogAnalyzerSQL {
     }
     String logFile = args[0];
     JavaRDD<ApacheAccessLog> accessLogs = sc.textFile(logFile)
-        .map(new Function<String, ApacheAccessLog>() {
-          @Override
-          public ApacheAccessLog call(String logline) throws Exception {
-            return ApacheAccessLog.parseFromLogLine(logline);
-          }
-        });
+        .map(Functions.PARSE_LOG_LINE);
 
     JavaSQLContext sqlContext = new JavaSQLContext(sc);
-    JavaSchemaRDD schemaRDD = sqlContext.applySchema(accessLogs, ApacheAccessLog.class).cache();
+    JavaSchemaRDD schemaRDD = sqlContext.applySchema(accessLogs,
+        ApacheAccessLog.class).cache();
     schemaRDD.registerAsTable("logs");
 
     // Calculate statistics based on the content size.
@@ -51,8 +48,10 @@ public class LogAnalyzerSQL {
         sqlContext.sql("SELECT SUM(contentSize), COUNT(*), MIN(contentSize), MAX(contentSize) FROM logs")
             .map(new Function<Row, Tuple4<Long, Long, Long, Long>>() {
               @Override
-              public Tuple4<Long, Long, Long, Long> call(Row row) throws Exception {
-                return new Tuple4<Long, Long, Long, Long>(row.getLong(0), row.getLong(1), row.getLong(2), row.getLong(3));
+              public Tuple4<Long, Long, Long, Long> call(Row row)
+                  throws Exception {
+                return new Tuple4<Long, Long, Long, Long>(row.getLong(0),
+                    row.getLong(1), row.getLong(2), row.getLong(3));
               }
             })
             .first();
@@ -71,7 +70,8 @@ public class LogAnalyzerSQL {
           }
         })
         .take(1000);
-    System.out.println(String.format("Response code counts: %s", responseCodeToCount));
+    System.out.println(
+        String.format("Response code counts: %s", responseCodeToCount));
 
     // Any IPAddress that has accessed the server more than 10 times.
     List<String> ipAddresses = sqlContext
@@ -83,7 +83,8 @@ public class LogAnalyzerSQL {
           }
         })
         .take(100);  // Take only 100 in case this is a super large data set.
-    System.out.println(String.format("IPAddresses > 10 times: %s", ipAddresses));
+    System.out.println(
+        String.format("IPAddresses > 10 times: %s", ipAddresses));
 
     // Top Endpoints.
     List<Tuple2<String, Long>> topEndpoints = sqlContext
@@ -91,7 +92,8 @@ public class LogAnalyzerSQL {
         .map(new Function<Row, Tuple2<String, Long>>() {
                @Override
                public Tuple2<String, Long> call(Row row) throws Exception {
-                 return new Tuple2<String, Long>(row.getString(0), row.getLong(1));
+                 return new Tuple2<String, Long>(
+                     row.getString(0), row.getLong(1));
                }
              })
         .collect();

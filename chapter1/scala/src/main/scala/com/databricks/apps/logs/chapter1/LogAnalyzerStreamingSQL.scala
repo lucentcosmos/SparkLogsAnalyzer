@@ -1,5 +1,6 @@
-package com.databricks.apps.logs
+package com.databricks.apps.logs.chapter1
 
+import com.databricks.apps.logs.ApacheAccessLog
 import org.apache.spark.sql.SQLContext
 import org.apache.spark.{SparkContext, SparkConf}
 import org.apache.spark.streaming.{StreamingContext, Duration}
@@ -18,7 +19,7 @@ import org.apache.spark.streaming.{StreamingContext, Duration}
  *
  * Example command to run:
  * % spark-submit
- *   --class "com.databricks.apps.logs.LogAnalyzerStreaming"
+ *   --class "com.databricks.apps.logs.chapter1.LogAnalyzerStreaming"
  *   --master local[4]
  *   target/scala-2.10/spark-logs-analyzer_2.10-1.0.jar
  */
@@ -31,6 +32,7 @@ object LogAnalyzerStreamingSQL {
     val sc = new SparkContext(sparkConf)
 
     val sqlContext = new SQLContext(sc)
+    import sqlContext.createSchemaRDD
 
     val streamingContext = new StreamingContext(sc, SLIDE_INTERVAL)
 
@@ -44,7 +46,6 @@ object LogAnalyzerStreamingSQL {
       if (accessLogs.count() == 0) {
         println("No access com.databricks.app.logs received in this time interval")
       } else {
-        import sqlContext.createSchemaRDD
         accessLogs.registerAsTable("com/databricks/app/logs")
 
         // Calculate statistics based on the content size.

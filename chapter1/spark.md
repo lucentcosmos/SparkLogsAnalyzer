@@ -10,7 +10,7 @@ Before we start, we need two things:
 data.  If not, you can use the sample one provided at
  [data/apache.access.log](../data/apache.access.log).
 * *A parser and model for the log file* - see
- [ApacheAccessLog.java](src/main/java/com/databricks/apps/log/ApacheAccessLog.java).
+ [ApacheAccessLog.java](src/main/java/com/databricks/apps/logs/chapter1/ApacheAccessLog.java).
 
 The example code uses an Apache access log file since that's a well known
 and common log format.  It would be easy to rewrite the parser for a different log format if needed.
@@ -141,5 +141,5 @@ List<Tuple2<String, Long>> topEndpoints = accessLogs
 System.out.println("Top Endpoints: " + topEndpoints);
 ```
 
-These code snippets are from [LogAnalyzer.java](java8/src/main/com/databricks/apps/log/LogAnalyzer.java).
+These code snippets are from [LogAnalyzer.java](java8/src/main/com/databricks/apps/logs/chapter1/LogAnalyzer.java).
 Now that we've walked through the code, try running that example.

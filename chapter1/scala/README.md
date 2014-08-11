@@ -10,10 +10,10 @@ To compile this code, use sbt:
 
 To run an example, such as LogAnalyzer, you can use spark-submit program
 ```
-%  ${YOUR_SPARK_HOME}/bin/spark-submit
-   --class "com.databricks.apps.logs.LogAnalyzer"
-   --master local[4]
-   target/scala-2.10/spark-com.databricks.app.logs-analyzer_2.10-1.0.jar
+%  ${YOUR_SPARK_HOME}/bin/spark-submit \
+   --class "com.databricks.apps.logs.chapter1.LogAnalyzer" \
+   --master local[4] \
+   target/scala-2.10/spark-logs-analyzer_2.10-1.0.jar \
    ../../data/apache.access.log
 ```
 
