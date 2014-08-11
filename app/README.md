@@ -11,4 +11,5 @@ These are the features of our MVP (minimal viable product) logs analyzer applica
   refreshed on a set interval.
 
 You can use this simple application as a skeleton and combine features from
-the chapters to produce your own custom logs analysis application.
+the chapters to produce your own custom logs analysis application.  The main
+class is [LogAnalyzerAppMain.java](java8/src/main/java/com/databricks/apps/logs/LogAnalyzerAppMain.java).

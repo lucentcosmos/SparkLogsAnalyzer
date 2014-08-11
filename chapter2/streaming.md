@@ -23,7 +23,7 @@ and pass in the directory to monitor for log files.
 JavaDStream<String> logData = jssc.textFileStream(directory);
 ```
 
-Try running [LogAnalyzerStreamingImportDirectory.java](src/main/java/com/databricks/apps/logs/chapter2/LogAnalyzerStreamingImportDirectory.java)
+Try running [LogAnalyzerStreamingImportDirectory.java](java8/src/main/java/com/databricks/apps/logs/chapter2/LogAnalyzerStreamingImportDirectory.java)
 by specifying a directory.   You'll also need to drop or copy some new log files
 into that directory while the program is running.
 

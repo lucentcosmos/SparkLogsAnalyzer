@@ -85,4 +85,4 @@ System.out.println(String.format("Top Endpoints: %s", topEndpoints));
 
 One thing to note though is that Spark SQL does not allow using reserved keyworks as alias names.  In other words, ```SELECT COUNT(*) AS count``` will not work, but ```SELECT COUNT(*) AS the_count``` does.
 
-Try running [LogAnalyzerSQL.java](java8/src/main/com/databricks/apps/logs/chapter1/LogAnalyzerSQL.java) now.
+Try running [LogAnalyzerSQL.java](java8/src/main/java/com/databricks/apps/logs/chapter1/LogAnalyzerSQL.java) now.
