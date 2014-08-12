@@ -1,5 +1,6 @@
 package com.databricks.apps.logs;
 
+import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -9,13 +10,13 @@ import java.util.regex.Pattern;
  * This class represents an Apache access log line.
  * See http://httpd.apache.org/docs/2.2/logs.html for more details.
  */
-public class ApacheAccessLog {
+public class ApacheAccessLog implements Serializable {
   private static final Logger logger = Logger.getLogger("Access");
 
   private String ipAddress;
   private String clientIdentd;
   private String userID;
-  private long timestamp;
+  private String dateTimeString;
   private String method;
   private String endpoint;
   private String protocol;
@@ -29,7 +30,7 @@ public class ApacheAccessLog {
     this.ipAddress = ipAddress;
     this.clientIdentd = clientIdentd;
     this.userID = userID;
-    this.timestamp = 0L;  // TODO: Parse from dateTime String;
+    this.dateTimeString = dateTime;  // TODO: Parse from dateTime String;
     this.method = method;
     this.endpoint = endpoint;
     this.protocol = protocol;
@@ -49,8 +50,8 @@ public class ApacheAccessLog {
     return userID;
   }
 
-  public long getTimestamp() {
-    return timestamp;
+  public String getDateTimeString() {
+    return dateTimeString;
   }
 
   public String getMethod() {
@@ -85,8 +86,8 @@ public class ApacheAccessLog {
     this.userID = userID;
   }
 
-  public void setTimestamp(long timestamp) {
-    this.timestamp = timestamp;
+  public void setDateTimeString(String dateTimeString) {
+    this.dateTimeString = dateTimeString;
   }
 
   public void setMethod(String method) {
@@ -125,5 +126,11 @@ public class ApacheAccessLog {
 
     return new ApacheAccessLog(m.group(1), m.group(2), m.group(3), m.group(4),
         m.group(5), m.group(6), m.group(7), m.group(8), m.group(9));
+  }
+
+  @Override public String toString() {
+    return String.format("%s %s %s [%s] \"%s %s %s\" %s %s",
+        ipAddress, clientIdentd, userID, dateTimeString, method, endpoint,
+        protocol, responseCode, contentSize);
   }
 }

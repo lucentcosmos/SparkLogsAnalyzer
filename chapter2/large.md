@@ -7,26 +7,48 @@ to write the data to files directly from the Spark workers.
 
 ## Save the RDD to files
 
-RDD's have a number of built in methods for saving them to disk.  We'll
-demonstrate the simple ```.saveAsTextFile()``` method.  This will write the data
-to simple text files where the ```.toString()``` method is called on the object.
+RDD's have some built in methods for saving them to disk.  Once in files, many of the Hadoop databases can bulk load in data directly from files, as long as they are in
+a specific format.  It's also worth mentioning [Sqoop](http://http://sqoop.apache.org/) - a very useful tool that can import Hadoop files into various databases.
 
-[[TODO: Insert example for saveAsTextFile]]
+In the following code example, we demonstrate the simple ```.saveAsTextFile()``` method.
+This will write the data to simple text files where the ```.toString()``` method is called on each RDD element and one element is written per line.  The number of files output is equal to the
+the number of partitions of the RDD being saved.  In this sample, the RDD is repartitioned to control the number of output files.
 
-Run the example now - notice that number of files that are output depends on
-the number of partitions of the RDD being saved.
+```java
+public class LogAnalyzerExportRDD {
+  // Optionally modify this based as makes sense for your dataset.
+  public static final int NUM_PARTITIONS = 2;
 
-Another common use case is to output to various Hadoop file formats.
-Many of the Hadoop databases can load in data directly from files in a
-specific format.  [Sqoop](http://http://sqoop.apache.org/) is a very useful tool that can bulk import large sets of Hadoop files into various databases.
+  public static void main(String[] args) throws IOException {
+    // Create the spark context.
+    SparkConf conf = new SparkConf().setAppName("Log Analyzer SQL");
+    JavaSparkContext sc = new JavaSparkContext(conf);
+
+    if (args.length < 2) {
+      System.out.println("Must specify an access logs file and an output file.");
+      System.exit(-1);
+    }
+    String inputFile = args[0];
+    String outputDirectory = args[1];
+    JavaRDD<ApacheAccessLog> accessLogs = sc.textFile(inputFile)
+        .map(ApacheAccessLog::parseFromLogLine)
+        .repartition(NUM_PARTITIONS); // Optionally, change this.
+
+    accessLogs.saveAsTextFile(outputDirectory);
+
+    sc.stop();
+  }
+}
+```
+
+Run [LogAnalyzerExportRDD.java](java8/src/main/java/com/databricks/apps/logs/chapter2/LogAnalyzerExportRDD.java) now.
 
 Refer to the API documentation for other built in methods for saving to file.
-There are different built in methods for the RDD's, so skim the whole
-RDD package to see if there is something to suit your needs.
+There are different built in methods for saving RDD's to files in various formats, so skim the whole RDD package to see if there is something to suit your needs.
 
-## Saving directly to a data storage
+## Saving RDD directly to a data storage
 
-Of course, you could also write your own custom writer on all the elements in your RDD, but there's a lot of ways to write something that looks like it would work, but does not.  Here are some things to watch out for:
+Of course, you could also write your own custom writer and call a transform on your RDD to write each element to your data storage, but there's a lot of ways to write something that looks like it would work, but does not work well in a distributed environment.  Here are some things to watch out for:
 
 * Use partitioning to control the parallelism for writing to your data storage.  Your data storage may not support too many concurrent connections.
 * Use batching for writing out multiple objects at a time if batching is optimal for your data storage.
