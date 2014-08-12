@@ -53,5 +53,7 @@ public class LogAnalyzerExportSmallData {
     out.write(String.format("Top Endpoints: %s\n", topEndpoints));
 
     out.close();
+
+    sc.stop();
   }
 }

@@ -1,6 +1,7 @@
 package com.databricks.apps.logs;
 
 import java.io.Serializable;
+import java.lang.String;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -16,7 +17,7 @@ public class ApacheAccessLog implements Serializable {
   private String ipAddress;
   private String clientIdentd;
   private String userID;
-  private long timestamp;
+  private String dateTimeString;
   private String method;
   private String endpoint;
   private String protocol;
@@ -30,7 +31,7 @@ public class ApacheAccessLog implements Serializable {
     this.ipAddress = ipAddress;
     this.clientIdentd = clientIdentd;
     this.userID = userID;
-    this.timestamp = 0L;  // TODO: Parse from dateTime String;
+    this.dateTimeString = dateTime;
     this.method = method;
     this.endpoint = endpoint;
     this.protocol = protocol;
@@ -50,8 +51,8 @@ public class ApacheAccessLog implements Serializable {
     return userID;
   }
 
-  public long getTimestamp() {
-    return timestamp;
+  public String getDateTimeString() {
+    return dateTimeString;
   }
 
   public String getMethod() {
@@ -86,8 +87,8 @@ public class ApacheAccessLog implements Serializable {
     this.userID = userID;
   }
 
-  public void setTimestamp(long timestamp) {
-    this.timestamp = timestamp;
+  public void setDateTimeString(String dateTimeString) {
+    this.dateTimeString = dateTimeString;
   }
 
   public void setMethod(String method) {
@@ -126,5 +127,11 @@ public class ApacheAccessLog implements Serializable {
 
     return new ApacheAccessLog(m.group(1), m.group(2), m.group(3), m.group(4),
         m.group(5), m.group(6), m.group(7), m.group(8), m.group(9));
+  }
+
+  @Override public String toString() {
+    return String.format("%s %s %s [%s] \"%s %s %s\" %s %s",
+        ipAddress, clientIdentd, userID, dateTimeString, method, endpoint,
+        protocol, responseCode, contentSize);
   }
 }

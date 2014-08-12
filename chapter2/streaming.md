@@ -7,9 +7,9 @@ continuously writing logs, and we want to process all of those files.  This
 section contains scalable solutions for data import.  Since streaming is now
 used, there is no longer the need for a nightly batch job to process logs,
 but instead - this logs processing program can be long-lived - continuously
-receiving new logs data, processing the data, and computing refreshed stats in a production system.
+receiving new logs data, processing the data, and computing log stats.
 
-## Built in Methods for Streaming Input
+## Built in Methods for Streaming Import
 
 The StreamingContext has many built in methods for importing data for streaming.
 We used ```socketTextStream``` in the previous chapter, and we'll use ```textFileStream```
@@ -19,7 +19,8 @@ Just replace the call to ```socketTextStream``` with ```textFileStream```,
 and pass in the directory to monitor for log files.
 
 ```java
-// This methods monitors a directory for new files to read in for streaming.
+// This methods monitors a directory for new files
+// to read in for streaming.
 JavaDStream<String> logData = jssc.textFileStream(directory);
 ```
 
@@ -30,15 +31,16 @@ into that directory while the program is running.
 There are more built-in input methods for streaming - check them out in the
 reference API documents for the StreamingContext.
 
-## KafkaInputDStream
+## Kafka
 
 While the previous example picks up new log files right away - the log
 files aren't copied over until a long time after the HTTP requests in the logs
 actually occurred, so we don't get up to date log statistics.  To get real time
 logs processing, we need a way to send over log lines immediately.  Kafka is a
-high-throughput distributed message system that is perfect for that use case.
+high-throughput distributed message system that is perfect for that use case.  There
+is an external module of Spark for Kafka import.
 
-Here is some useful documentation to set up with Kafka in streaming:
+Here is some useful documentation to set up Kafka for Spark Streaming:
 
 * [Kafka Documentation](http://kafka.apache.org/documentation.html)
 * [KafkaUtils class in the external module of the Spark project](https://github.com/apache/spark/blob/master/external/kafka/src/main/scala/org/apache/spark/streaming/kafka/KafkaUtils.scala) - This is the external module that has been written that imports data from Kafka into Spark Streaming.
