@@ -16,7 +16,7 @@ public class ApacheAccessLog implements Serializable {
   private String ipAddress;
   private String clientIdentd;
   private String userID;
-  private long timestamp;
+  private String dateTimeString;
   private String method;
   private String endpoint;
   private String protocol;
@@ -30,7 +30,7 @@ public class ApacheAccessLog implements Serializable {
     this.ipAddress = ipAddress;
     this.clientIdentd = clientIdentd;
     this.userID = userID;
-    this.timestamp = 0L;  // TODO: Parse from dateTime String;
+    this.dateTimeString = dateTime;  // TODO: Parse from dateTime String;
     this.method = method;
     this.endpoint = endpoint;
     this.protocol = protocol;
@@ -50,8 +50,8 @@ public class ApacheAccessLog implements Serializable {
     return userID;
   }
 
-  public long getTimestamp() {
-    return timestamp;
+  public String getDateTimeString() {
+    return dateTimeString;
   }
 
   public String getMethod() {
@@ -86,8 +86,8 @@ public class ApacheAccessLog implements Serializable {
     this.userID = userID;
   }
 
-  public void setTimestamp(long timestamp) {
-    this.timestamp = timestamp;
+  public void setDateTimeString(String dateTimeString) {
+    this.dateTimeString = dateTimeString;
   }
 
   public void setMethod(String method) {
