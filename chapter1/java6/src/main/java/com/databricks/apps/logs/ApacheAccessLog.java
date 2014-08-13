@@ -30,7 +30,7 @@ public class ApacheAccessLog implements Serializable {
     this.ipAddress = ipAddress;
     this.clientIdentd = clientIdentd;
     this.userID = userID;
-    this.timestamp = 0L;  // TODO: Parse from dateTime String;
+    this.dateTimeString = dateTime;  // TODO: Parse from dateTime String;
     this.method = method;
     this.endpoint = endpoint;
     this.protocol = protocol;

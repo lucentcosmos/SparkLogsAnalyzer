@@ -43,11 +43,10 @@ public class LogAnalyzerAppMain {
     private final String checkpointDirectory =
         "/tmp/log-analyzer-streaming";
 
-    // The path to this project's resources root folder
-    //   where the index.html.template template is found.
-    // This file needs to be on a filesystem accessible to all Spark workers.
+    // The path to this project's index.html.template
+    // This file needs to be accessible to all Spark workers.
     private final String indexHtmlTemplate =
-        "/Users/vida/Code/SparkLogsAnalyzer/app/java8/src/main/resources/index.html.template";
+        "./src/main/resources/index.html.template";
 
     private Flags() {}
 
@@ -82,7 +81,7 @@ public class LogAnalyzerAppMain {
 
   public static void main(String[] args) throws IOException {
     SparkConf conf = new SparkConf()
-        .setAppName("Databricks Sample Application: Logs Analysis with Spark");
+        .setAppName("A Databricks Reference Application: Logs Analysis with Spark");
     JavaSparkContext sc = new JavaSparkContext(conf);
     JavaStreamingContext jssc = new JavaStreamingContext(sc,
         Flags.getInstance().getSlideInterval());
@@ -103,12 +102,11 @@ public class LogAnalyzerAppMain {
     logAnalyzerTotal.processAccessLogs(accessLogsDStream);
 
     // Calculate statistics for the last time interval.
-    logAnalyzerWindowed.processLogs(accessLogsDStream);
+    logAnalyzerWindowed.processAccessLogs(accessLogsDStream);
 
     // Render the output each time there is a new RDD in the accessLogsDStream.
     Renderer renderer = new Renderer();
     accessLogsDStream.foreachRDD(rdd -> {
-      System.out.println("Rendering a new html page");
       // Call this to output the stats.
       renderer.render(logAnalyzerTotal.getLogStatistics(),
           logAnalyzerWindowed.getLogStatistics());
