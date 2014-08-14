@@ -1,5 +1,7 @@
 package com.databricks.apps.logs.chapter1;
 
+import com.databricks.apps.logs.ApacheAccessLog;
+
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
@@ -62,9 +64,9 @@ public class LogAnalyzer {
     JavaRDD<Long> contentSizes =
        accessLogs.map(ApacheAccessLog::getContentSize).cache();
     System.out.println(String.format("Content Size Avg: %s, Min: %s, Max: %s",
-        contentSizes.reduce(SUM_REDUCER) / contentSizes.count(),
-        contentSizes.min(Comparator.naturalOrder()),
-        contentSizes.max(Comparator.naturalOrder())));
+       contentSizes.reduce(SUM_REDUCER) / contentSizes.count(),
+       contentSizes.min(Comparator.naturalOrder()),
+       contentSizes.max(Comparator.naturalOrder())));
 
     // Compute Response Code to Count.
     List<Tuple2<Integer, Long>> responseCodeToCount =

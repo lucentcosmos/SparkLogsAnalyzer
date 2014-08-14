@@ -10,6 +10,8 @@ These are the features of our MVP (minimal viable product) logs analyzer applica
 * Write the calculated stats to an html file on the local file system that gets
   refreshed on a set interval.
 
+![Log Analyzer MVP Application](app_diagram.png)
+
 You can use this simple application as a skeleton and combine features from
 the chapters to produce your own custom logs analysis application.  The main
 class is [LogAnalyzerAppMain.java](java8/src/main/java/com/databricks/apps/logs/LogAnalyzerAppMain.java).

@@ -7,7 +7,7 @@ example, we use a window length of 30 seconds and a slide interval of
 10 seconds as a comfortable choice for development.
 
 The windows feature of Spark Streaming makes it very easy to compute
-stats for a window of time.
+stats for a window of time, using the `window` function.
 
 The first step is initalize the SparkConf and context objects, in particular a streaming context.  Note how only one Spark context is created from the conf and the streaming and sql contexts are created from those.  Next, the main body should be written.  Finally, the example calls ```start()``` on the streaming context, and ```awaitTermination() ```to keep the streaming context running.
 

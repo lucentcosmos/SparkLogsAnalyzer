@@ -1,9 +1,10 @@
 package com.databricks.apps.logs.chapter1;
 
 import com.databricks.apps.logs.ApacheAccessLog;
-
 import com.google.common.base.Optional;
 import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.JavaPairRDD;
+import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.streaming.Duration;
@@ -12,6 +13,7 @@ import org.apache.spark.streaming.api.java.JavaPairDStream;
 import org.apache.spark.streaming.api.java.JavaReceiverInputDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
 import scala.Tuple2;
+import scala.Tuple4;
 
 import java.io.Serializable;
 import java.util.Comparator;
@@ -32,11 +34,11 @@ import java.util.concurrent.atomic.AtomicLong;
  *
  * Example command to run:
  * %  ${YOUR_SPARK_HOME}/bin/spark-submit
- *     --class "com.databricks.apps.logs.chapter1.LogAnalyzerStreamingTotal"
+ *     --class "com.databricks.apps.logs.chapter1.LogAnalyzerStreamingTotalRefactored"
  *     --master local[4]
  *     target/log-analyzer-1.0.jar
  */
-public class LogAnalyzerStreamingTotal {
+public class LogAnalyzerStreamingTotalRefactored {
   private static Function2<Long, Long, Long> SUM_REDUCER = (a, b) -> a + b;
 
   private static class ValueComparator<K, V>
@@ -55,12 +57,12 @@ public class LogAnalyzerStreamingTotal {
 
   private static Function2<List<Long>, Optional<Long>, Optional<Long>>
      COMPUTE_RUNNING_SUM = (nums, current) -> {
-       long sum = current.or(0L);
-       for (long i : nums) {
-         sum += i;
-       }
-       return Optional.of(sum);
-     };
+    long sum = current.or(0L);
+    for (long i : nums) {
+      sum += i;
+    }
+    return Optional.of(sum);
+  };
 
   // These static variables stores the running content size values.
   private static final AtomicLong runningCount = new AtomicLong(0);
@@ -68,56 +70,97 @@ public class LogAnalyzerStreamingTotal {
   private static final AtomicLong runningMin = new AtomicLong(Long.MAX_VALUE);
   private static final AtomicLong runningMax = new AtomicLong(Long.MIN_VALUE);
 
+  // These functions below that could be shared with the batch library.
+  public static Tuple4<Long, Long, Long, Long> contentSizeStats(
+     JavaRDD<ApacheAccessLog> accessLogRDD) {
+    JavaRDD<Long> contentSizes =
+       accessLogRDD.map(ApacheAccessLog::getContentSize).cache();
+    return new Tuple4<>(contentSizes.count(), contentSizes.reduce(SUM_REDUCER),
+       contentSizes.min(Comparator.naturalOrder()),
+       contentSizes.max(Comparator.naturalOrder()));
+  }
+
+  public static JavaPairRDD<Integer, Long> responseCodeCount(
+     JavaRDD<ApacheAccessLog> accessLogRDD) {
+    return accessLogRDD
+       .mapToPair(s -> new Tuple2<>(s.getResponseCode(), 1L))
+       .reduceByKey(SUM_REDUCER);
+  }
+
+  public static JavaPairRDD<String, Long> ipAddressCount(
+     JavaRDD<ApacheAccessLog> accessLogRDD) {
+    return accessLogRDD
+       .mapToPair(log -> new Tuple2<>(log.getIpAddress(), 1L))
+       .reduceByKey(SUM_REDUCER);
+  }
+
+  public static JavaRDD<String> filterIPAddress(
+     JavaPairRDD<String, Long> ipAddressCount) {
+    return ipAddressCount
+       .filter(tuple -> tuple._2() > 10)
+       .map(Tuple2::_1);
+  }
+
+  public static JavaPairRDD<String, Long> endpointCount(
+     JavaRDD<ApacheAccessLog> accessLogRDD) {
+    return accessLogRDD
+       .mapToPair(log -> new Tuple2<>(log.getEndpoint(), 1L))
+       .reduceByKey(SUM_REDUCER);
+  }
+
   public static void main(String[] args) {
     SparkConf conf = new SparkConf().setAppName("Log Analyzer Streaming Total");
     JavaSparkContext sc = new JavaSparkContext(conf);
 
     JavaStreamingContext jssc = new JavaStreamingContext(sc,
-        new Duration(10000));  // This sets the update window to be every 10 seconds.
+       new Duration(10000));  // This sets the update window to be every 10 seconds.
 
     // Checkpointing must be enabled to use the updateStateByKey function.
     jssc.checkpoint("/tmp/log-analyzer-streaming");
 
     JavaReceiverInputDStream<String> logDataDStream =
-        jssc.socketTextStream("localhost", 9999);
+       jssc.socketTextStream("localhost", 9999);
 
     JavaDStream<ApacheAccessLog> accessLogDStream =
-        logDataDStream.map(ApacheAccessLog::parseFromLogLine).cache();
+       logDataDStream.map(ApacheAccessLog::parseFromLogLine).cache();
 
     // Calculate statistics based on the content size, and update the static variables to track this.
-    JavaDStream<Long> contentSizeDStream =
-        accessLogDStream.map(ApacheAccessLog::getContentSize).cache();
-    contentSizeDStream.foreachRDD(rdd -> {
-      if (rdd.count() > 0) {
-        runningSum.getAndAdd(rdd.reduce(SUM_REDUCER));
-        runningCount.getAndAdd(rdd.count());
-        runningMin.set(Math.min(runningMin.get(), rdd.min(Comparator.naturalOrder())));
-        runningMax.set(Math.max(runningMax.get(), rdd.max(Comparator.naturalOrder())));
-        System.out.print("Content Size Avg: " + runningSum.get() / runningCount.get());
-        System.out.print(", Min: " + runningMin.get());
-        System.out.println(", Max: " + runningMax.get());
-      }
-      return null;
-    });
+    accessLogDStream.foreachRDD(accessLogRDD -> {
+         if (accessLogRDD.count() > 0) {
+           Tuple4<Long, Long, Long, Long> contentSizeStats =
+              contentSizeStats(accessLogRDD);
+           runningCount.getAndAdd(contentSizeStats._1());
+           runningSum.getAndAdd(contentSizeStats._2());
+           runningMin.set(Math.min(runningMin.get(), contentSizeStats._3()));
+           runningMax.set(Math.max(runningMax.get(), contentSizeStats._4()));
+
+           System.out.print("Content Size Avg: " + runningSum.get() / runningCount.get());
+           System.out.print(", Min: " + runningMin.get());
+           System.out.println(", Max: " + runningMax.get());
+         }
+
+         return null;
+       }
+    );
 
     // Compute Response Code to Count.
-    // Note the use of updateStateByKey.
+    // Notice the user transformToPair to produce the a DStream of
+    // response code counts, and then updateStateByKey to accumulate
+    // the response code counts for all of time.
     JavaPairDStream<Integer, Long> responseCodeCountDStream = accessLogDStream
-        .mapToPair(s -> new Tuple2<>(s.getResponseCode(), 1L))
-        .reduceByKey(SUM_REDUCER)
-        .updateStateByKey(COMPUTE_RUNNING_SUM);
-    responseCodeCountDStream.foreachRDD(rdd -> {
+       .transformToPair(LogAnalyzerStreamingTotalRefactored::responseCodeCount);
+    JavaPairDStream<Integer, Long> cumulativeResponseCodeCountDStream =
+       responseCodeCountDStream.updateStateByKey(COMPUTE_RUNNING_SUM);
+    cumulativeResponseCodeCountDStream.foreachRDD(rdd -> {
       System.out.println("Response code counts: " + rdd.take(100));
       return null;
     });
 
     // A DStream of ipAddresses accessed > 10 times.
     JavaDStream<String> ipAddressesDStream = accessLogDStream
-        .mapToPair(s -> new Tuple2<>(s.getIpAddress(), 1L))
-        .reduceByKey(SUM_REDUCER)
-        .updateStateByKey(COMPUTE_RUNNING_SUM)
-        .filter(tuple -> tuple._2() > 10)
-        .map(Tuple2::_1);
+       .transformToPair(LogAnalyzerStreamingTotalRefactored::ipAddressCount)
+       .updateStateByKey(COMPUTE_RUNNING_SUM)
+       .transform(LogAnalyzerStreamingTotalRefactored::filterIPAddress);
     ipAddressesDStream.foreachRDD(rdd -> {
       List<String> ipAddresses = rdd.take(100);
       System.out.println("All IPAddresses > 10 times: " + ipAddresses);
@@ -126,12 +169,11 @@ public class LogAnalyzerStreamingTotal {
 
     // A DStream of endpoint to count.
     JavaPairDStream<String, Long> endpointCountsDStream = accessLogDStream
-        .mapToPair(s -> new Tuple2<>(s.getEndpoint(), 1L))
-        .reduceByKey(SUM_REDUCER)
-        .updateStateByKey(COMPUTE_RUNNING_SUM);
+       .transformToPair(LogAnalyzerStreamingTotalRefactored::endpointCount)
+       .updateStateByKey(COMPUTE_RUNNING_SUM);
     endpointCountsDStream.foreachRDD(rdd -> {
       List<Tuple2<String, Long>> topEndpoints =
-          rdd.takeOrdered(10, new ValueComparator<>(Comparator.<Long>naturalOrder()));
+         rdd.takeOrdered(10, new ValueComparator<>(Comparator.<Long>naturalOrder()));
       System.out.println("Top Endpoints: " + topEndpoints);
       return null;
     });

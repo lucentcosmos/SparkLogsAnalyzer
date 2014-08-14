@@ -1,5 +1,6 @@
 package com.databricks.apps.logs.chapter1;
 
+import com.databricks.apps.logs.ApacheAccessLog;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
