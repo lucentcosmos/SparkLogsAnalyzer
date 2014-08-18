@@ -4,15 +4,14 @@ This section covers batch importing data into Apache Spark, such as
 seen in the non-streaming examples from Chapter 1.  Those examples load data
 from files all at once into one RDD, processes that RDD, the job completes,
 and the program exits.  In a production system, you could set up a cron job to
-kick off a batch job each night to process the last day's worth of log files and
-then publish statistics for the last day.
+kick off a batch job each night to process the last day's worth of log files and then publish statistics for the last day.
 
 ## File Systems
 
 To support batch import of data on a Spark cluster, the data needs to be accessible by all machines on the cluster.  Files that are only accessible on one worker machine
 and cannot be read by the others will cause failures.
 
-If you have a small dataset that can fit on one machine, you could manually copy your files onto all the nodes on your Spark cluster, using *rsync* for example.
+If you have a small dataset that can fit on one machine, you could manually copy your files onto all the nodes on your Spark cluster, perhaps using *rsync* to make that easier.
 
 *NFS* or some other network file system makes sure all your machines can access the same files without require you to copy the files around.  But NFS isn't fault tolerant
 to machine failures and if your dataset is too
@@ -70,7 +69,7 @@ should ideally be on the same machines as your Hadoop cluster to make it easy to
 read files.  The Spark binary you run on your clusters must be compiled with the
 same HDFS version as the one you wish to use.
 
-We won't go over explicit instructions here - since there are so many ways to install HDFS, but heading to the [Hadoop homepage](http://hadoop.apache.org/)
+There are many ways to install HDFS, but heading to the [Hadoop homepage](http://hadoop.apache.org/)
 is one way to get started.
 
 Run [LogAnalyzerBatchImport.java](java8/src/main/java/com/databricks/apps/logs/chapter2/LogAnalyzerBatchImport.java)
